@@ -1,0 +1,62 @@
+version: "3.9"
+
+networks:
+  vulnnet:
+    driver: bridge
+    internal: false   # set to true to fully block internet egress
+
+volumes:
+  vulnlab_data:
+
+services:
+
+  # ─── Reverse proxy ──────────────────────────────────────────────────────────
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: vulnlab_nginx
+    ports:
+      - "8080:80"       # access via http://localhost:8080
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app
+      - admin
+    networks:
+      - vulnnet
+    restart: unless-stopped
+
+  # ─── Main vulnerable application ────────────────────────────────────────────
+  app:
+    build: ./app
+    container_name: vulnlab_app
+    environment:
+      NODE_ENV: development
+      SESSION_SECRET: "vulnlab-secret-do-not-use-in-prod"
+      FLAG_PREFIX: "VULNLAB"
+    volumes:
+      - ./app:/usr/src/app
+      - /usr/src/app/node_modules
+      - vulnlab_data:/data
+    networks:
+      - vulnnet
+    restart: unless-stopped
+
+  # ─── Redis for sessions ──────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: vulnlab_redis
+    networks:
+      - vulnnet
+    restart: unless-stopped
+
+  # ─── Admin panel ─────────────────────────────────────────────────────────────
+  admin:
+    build: ./admin
+    container_name: vulnlab_admin
+    environment:
+      ADMIN_PASSWORD: "admin123"   # change this!
+    volumes:
+      - vulnlab_data:/data
+    networks:
+      - vulnnet
+    restart: unless-stopped

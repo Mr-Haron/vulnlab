@@ -1,0 +1,9 @@
+{
+  "name": "vulnlab-admin",
+  "version": "1.0.0",
+  "main": "server.js",
+  "dependencies": {
+    "better-sqlite3": "^9.4.3",
+    "express": "^4.18.3"
+  }
+}
