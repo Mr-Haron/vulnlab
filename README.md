@@ -1,4 +1,4 @@
-# ⚠ VulnLab — Security Training Platform
+# VulnLab — Security Training Platform
 
 > **FOR AUTHORISED INTERNAL TRAINING ONLY.**  
 > This application is deliberately insecure. Never expose it to the public internet.
